@@ -1,245 +1,334 @@
+using System;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class ImageToConfigTool : EditorWindow
 {
-    private Texture2D inputImage;
-    private float spacing = 1.0f;
-    private int targetCount = 20;
+    private Texture2D _inputImage;
+    private float _spacing = 1.0f;
+    private int _targetCount = 20;
 
-    [Header("Block Prefabs")]
-    public GameObject redPrefab;
-    public GameObject greenPrefab;
-    public GameObject yellowPrefab;
-    public GameObject orangePrefab;
-    public GameObject blackPrefab;
-    public GameObject whitePrefab;
-    public GameObject pinkPrefab;
-
-    [Header("Pig Prefabs")]
-    public GameObject pigRedPrefab;
-    public GameObject pigGreenPrefab;
-    public GameObject pigYellowPrefab;
-    public GameObject pigOrangePrefab;
-    public GameObject pigBlackPrefab;
-    public GameObject pigWhitePrefab;
-    public GameObject pigPinkPrefab;
-
-    private Dictionary<string, int> colorCount = new Dictionary<string, int>();
-    private Dictionary<string, int> edgeColorCount = new Dictionary<string, int>();
-    private Dictionary<string, List<GameObject>> Pigs = new Dictionary<string, List<GameObject>>();
-
+    private GameObject _blockGroup;
+    private GameObject _pigGroup;
+    
+    [Header("Pigs")]
+    private readonly Dictionary<string, List<GameObject>> _pigs = new Dictionary<string, List<GameObject>>();
+    private readonly Dictionary<string, GameObject> _pigPrefabs = new Dictionary<string, GameObject>();
+    
+    [Header("Blocks")]
+    private readonly Dictionary<string, int> _colorCount = new Dictionary<string, int>();
+    private readonly Dictionary<string, int> _edgeColorCount = new Dictionary<string, int>();
+    private readonly Dictionary<string, GameObject> _blockPrefabs = new Dictionary<string, GameObject>();
+    
     [MenuItem("Tools/Advanced Color Generator")]
     public static void ShowWindow() => GetWindow<ImageToConfigTool>("Color Tool");
 
-    void OnGUI()
+    private void OnGUI()
     {
-        inputImage = (Texture2D)EditorGUILayout.ObjectField("Input Image", inputImage, typeof(Texture2D), false);
-        redPrefab = (GameObject)EditorGUILayout.ObjectField("Red Prefab", redPrefab, typeof(GameObject), false);
-        greenPrefab = (GameObject)EditorGUILayout.ObjectField("Green Prefab", greenPrefab, typeof(GameObject), false);
-        yellowPrefab = (GameObject)EditorGUILayout.ObjectField("Yellow Prefab", yellowPrefab, typeof(GameObject), false);
-        orangePrefab = (GameObject)EditorGUILayout.ObjectField("Orange Prefab", orangePrefab, typeof(GameObject), false);
-        blackPrefab = (GameObject)EditorGUILayout.ObjectField("Black Prefab", blackPrefab, typeof(GameObject), false);
-        whitePrefab = (GameObject)EditorGUILayout.ObjectField("White Prefab", whitePrefab, typeof(GameObject), false);
-        pinkPrefab = (GameObject)EditorGUILayout.ObjectField("Pink Prefab", pinkPrefab, typeof(GameObject), false);
-
-        pigRedPrefab = (GameObject)EditorGUILayout.ObjectField("Pig Red Prefab", pigRedPrefab, typeof(GameObject), false);
-        pigGreenPrefab = (GameObject)EditorGUILayout.ObjectField("Pig Green Prefab", pigGreenPrefab, typeof(GameObject), false);
-        pigYellowPrefab = (GameObject)EditorGUILayout.ObjectField("Pig Yellow Prefab", pigYellowPrefab, typeof(GameObject), false);
-        pigOrangePrefab = (GameObject)EditorGUILayout.ObjectField("Pig Orange Prefab", pigOrangePrefab, typeof(GameObject), false);
-        pigBlackPrefab = (GameObject)EditorGUILayout.ObjectField("Pig Black Prefab", pigBlackPrefab, typeof(GameObject), false);
-        pigWhitePrefab = (GameObject)EditorGUILayout.ObjectField("Pig White Prefab", pigWhitePrefab, typeof(GameObject), false);
-        pigPinkPrefab = (GameObject)EditorGUILayout.ObjectField("Pig Pink Prefab", pigPinkPrefab, typeof(GameObject), false);
-
-
-        spacing = EditorGUILayout.FloatField("Spacing", spacing);
-        targetCount = EditorGUILayout.IntField("Target Count", targetCount);
-
-        if (GUILayout.Button($"Generate {targetCount}x{targetCount} Grid")) Generate();
+        _inputImage = (Texture2D)EditorGUILayout.ObjectField("Input Image", _inputImage, typeof(Texture2D), false);
+        _spacing = EditorGUILayout.FloatField("Spacing", _spacing);
+        _targetCount = EditorGUILayout.IntField("Target Count", _targetCount);
+        LoadAsset();
+        if (GUILayout.Button($"Generate {_targetCount}x{_targetCount} Grid")) GenerateMapAndPig();
     }
 
-    void Generate()
+    private async void LoadAsset()
     {
-        if (inputImage == null) return;
-
-        GameObject container = new GameObject("Generated_Art");
-        float stepX = (float)inputImage.width / targetCount;
-        float stepY = (float)inputImage.height / targetCount;
-
-        for (int i = 0; i < targetCount; i++)
+        try
         {
-            for (int j = 0; j < targetCount; j++)
+            string[] colors = { "Red", "Green", "Yellow", "Orange", "Black", "White", "Pink" };
+        
+            foreach (var c in colors)
             {
-                // Lấy mẫu tại tâm của ô để đạt độ chính xác cao nhất
-                int x = Mathf.FloorToInt(j * stepX + (stepX / 2f));
-                int y = Mathf.FloorToInt(i * stepY + (stepY / 2f));
-                Color pixelColor = inputImage.GetPixel(x, y);
-                
-                string color = GetClosestPrefab(pixelColor);
-                GameObject selectedPrefab = null;
-                switch (color)
-                {
-                    case "red":
-                        selectedPrefab = redPrefab;
-                        break;
-                    case "green":
-                        selectedPrefab = greenPrefab;
-                        break;
-                    case "yellow":
-                        selectedPrefab = yellowPrefab;
-                        break;
-                    case "orange":
-                        selectedPrefab = orangePrefab;
-                        break;
-                    case "black":
-                        selectedPrefab = blackPrefab;
-                        break;
-                    case "white":
-                        selectedPrefab = whitePrefab;
-                        break;
-                    case "pink":
-                        selectedPrefab = pinkPrefab;
-                        break;
-                    
-                }
+                // Load Block Prefab
+                var opBlock = Addressables.LoadAssetAsync<GameObject>($"{c}");
+                await opBlock.Task;
+                if (opBlock.Status == AsyncOperationStatus.Succeeded)
+                    _blockPrefabs[c.ToLower()] = opBlock.Result;
 
-                if (colorCount.ContainsKey(color))
-                {
-                    colorCount[color]++;
-                }
-                else
-                {
-                    colorCount[color] = 1;
-                }
-
-                if (i == 0 || i == targetCount - 1 || j == 0 || j == targetCount - 1)
-                {
-                    if (edgeColorCount.ContainsKey(color))
-                    {
-                        edgeColorCount[color]++;
-                    }
-                    else
-                    {
-                        edgeColorCount[color] = 1;
-                    }
-                }
-
-                if (selectedPrefab != null)
-                {
-                    Vector3 pos = new Vector3(j * spacing, i * spacing, 0);
-                    GameObject block = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
-                    block.transform.position = pos;
-                    block.transform.parent = container.transform;
-                }
+                // Load Pig Prefab
+                var opPig = Addressables.LoadAssetAsync<GameObject>($"Pig {c}");
+                await opPig.Task;
+                if (opPig.Status == AsyncOperationStatus.Succeeded)
+                    _pigPrefabs[c.ToLower()] = opPig.Result;
             }
         }
-
-        // create pig components
-
-        foreach (var data in colorCount)
+        catch (Exception e)
         {
-            GameObject pigPrefab = null;
-            switch (data.Key)
-            {
-                case "red":
-                    pigPrefab = pigRedPrefab;
-                    break;
-                case "green":
-                    pigPrefab = pigGreenPrefab;
-                    break;
-                case "yellow":
-                    pigPrefab = pigYellowPrefab;
-                    break;
-                case "orange":
-                    pigPrefab = pigOrangePrefab;
-                    break;
-                case "black":
-                    pigPrefab = pigBlackPrefab;
-                    break;
-                case "white":
-                    pigPrefab = pigWhitePrefab;
-                    break;
-                case "pink":
-                    pigPrefab = pigPinkPrefab;
-                    break;
-            }
+            // Debug.Log("Can't load asset: " + e.Message);
+        }
+    }
+    
+    private void GenerateMapAndPig()
+    {
+        ResetData();
+        GenerateMapBaseOnConfig();
+        GeneratePigBaseOnConfig();
+    }
 
-            int remainingBullet = Mathf.CeilToInt(data.Value/10f) * 10;
-            int[] bulletNumbers = {10,20,30,40};
-            List<GameObject> pigComponents = new List<GameObject>();
+    // ReSharper disable Unity.PerformanceAnalysis
+    private void GeneratePigBaseOnConfig()
+    {
+        _pigGroup = new GameObject("Pig Configuration")
+        {
+            transform =
+            {
+                position = new Vector3(0, -10, 0)
+            }
+        };
+
+        foreach (var data in _colorCount)
+        {
+            var pigPrefab = _pigPrefabs[data.Key];
+            var remainingBullet = Mathf.CeilToInt(data.Value/10f) * 10;
+            int[] bulletNumbers = {10,20,30,40,50};
+            var pigComponents = new List<GameObject>();
             while(remainingBullet > 0)
             {
-                int bullet = bulletNumbers[UnityEngine.Random.Range(0, bulletNumbers.Length)];
-                GameObject spawnedPig = (GameObject)PrefabUtility.InstantiatePrefab(pigPrefab);
+                var bullet = bulletNumbers[UnityEngine.Random.Range(0, bulletNumbers.Length)];
+                var spawnedPig = (GameObject)PrefabUtility.InstantiatePrefab(pigPrefab);
                 if(bullet > remainingBullet)
                 {
                     bullet = remainingBullet;
                 }
-                spawnedPig.GetComponent<PigComponent>().SetBulletCount(bullet);
+                
+                if (spawnedPig.TryGetComponent<PigComponent>(out var pigComp))
+                {
+                    pigComp.SetBulletCount(bullet);
+                }
                 remainingBullet -= bullet;
                 pigComponents.Add(spawnedPig);
+                
+                var pigTransform = spawnedPig.transform;
+                pigTransform.SetParent(_pigGroup.transform);
+                pigTransform.localPosition = Vector3.zero;
+            }
+            
+            _pigs[data.Key] = pigComponents;
+        }
+        ArrangePig();
+    }
+
+    private void  GenerateMapBaseOnConfig()
+    {
+        _blockGroup = new GameObject("Image Configuration")
+        {
+            transform =
+            {
+                position = new Vector3(0, 5, 0)
+            }
+        };
+        var stepX = (float)_inputImage.width / _targetCount;
+        var stepY = (float)_inputImage.height / _targetCount;
+        
+        var gridWidth = (_targetCount - 1) * _spacing;
+        var gridHeight = (_targetCount - 1) * _spacing;
+        var offset = new Vector3(-gridWidth / 2f, -gridHeight / 2f, 0);
+
+        for (var i = 0; i < _targetCount; i++)
+        {
+            for (var j = 0; j < _targetCount; j++)
+            {
+                var x = Mathf.FloorToInt(j * stepX + (stepX / 2f));
+                var y = Mathf.FloorToInt(i * stepY + (stepY / 2f));
+                var pixelColor = _inputImage.GetPixel(x, y);
+                
+                var color = GetClosestColor(pixelColor);
+                var selectedPrefab = _blockPrefabs[color];
+                
+                if (!_colorCount.TryAdd(color, 1))
+                {
+                    _colorCount[color]++;
+                }
+
+                if (i == 0 || i == _targetCount - 1 || j == 0 || j == _targetCount - 1)
+                {
+                    if (!_edgeColorCount.TryAdd(color, 1))
+                    {
+                        _edgeColorCount[color]++;
+                    }
+                }
+                var pos = new Vector3(j * _spacing, i * _spacing, 0) + offset;
+                var block = (GameObject)PrefabUtility.InstantiatePrefab(selectedPrefab);
+                block.transform.parent = _blockGroup.transform;
+                block.transform.localPosition = pos;
+            }
+        }
+    }
+
+    private void ArrangePig()
+    {
+        var primaryColor = MostColoredAtEdge(_edgeColorCount);
+        var pigsPrimary = _pigs[primaryColor];
+        
+        var lastY = -1;
+
+        var maxRows = 0;
+        var totalPigs = _pigs.Sum(pigColor => pigColor.Value.Count);
+
+        Debug.Log(totalPigs);
+
+        var calculatedCols = (totalPigs / 10) + 1;
+        
+        var maxCols = Mathf.Clamp(calculatedCols, 3, 5);
+        maxRows = Mathf.CeilToInt((float)totalPigs /maxCols);
+        var queue2Matrix = new GameObject[maxCols, maxRows];
+
+        var maxDistance = Mathf.Min(2, maxRows / 2 + 1);
+        const int stepLimit = 3;
+        var currentLv = 15;
+        var maxLv = 50;
+        var dl = (float)currentLv / maxLv;
+        for (var n = 0; n < pigsPrimary.Count; n++)
+        {
+            var posX = UnityEngine.Random.Range(0, maxCols);
+            var step = UnityEngine.Random.Range(1 + n/pigsPrimary.Count, stepLimit);
+            var posY = 0;
+            if (n == 0)
+            {
+                posY = (int)(dl * UnityEngine.Random.Range(0, 1));
+            }
+            else if (lastY >= maxDistance)
+            {
+                posY = 1;
+            }
+            else
+            {
+                posY = lastY + step;
             }
 
-            // PigComponent pigComponent = container.AddComponent<PigComponent>();
-            // pigComponent.pigColor = mostColoredPrefab.GetComponent<Renderer>().sharedMaterial.color;
-            Pigs[data.Key] = pigComponents;
+            if (posY < maxRows && queue2Matrix[posX, posY] == null)
+            {
+                queue2Matrix[posX,posY] = pigsPrimary[n];
+ 
+            }
+            else
+            {
+                var reRandomX = UnityEngine.Random.Range(0, maxCols);
+                while (queue2Matrix[reRandomX, posY] != null)
+                {
+                    reRandomX = UnityEngine.Random.Range(0, maxCols);
+                    break;
+                }
+                queue2Matrix[reRandomX,posY] = pigsPrimary[n];
+            }
+            lastY = posY;
+        }
+        FillRemainingSlots(queue2Matrix, maxRows, maxCols, primaryColor);
+    }
+
+    private void FillRemainingSlots(GameObject[,] queue2Matrix, int maxRows, int maxCols,string primaryColor)
+    {
+        var allFillerPigs = new List<GameObject>();
+        foreach (var pair in _pigs.Where(pair => pair.Key != primaryColor))
+        {
+            allFillerPigs.AddRange(pair.Value);
         }
         
-    }
-
-    string GetClosestPrefab(Color c)
-    {
-        Color targetRed = new Color(0.82f, 0.14f, 0.13f);
-        Color targetGreen = new Color(0.53f, 0.83f, 0.36f);
-        Color targetYellow = new Color(0.98f, 0.87f, 0.24f);
-        Color targetOrange = new Color(0.95f, 0.57f, 0.14f);
-        Color targetBlack = Color.black;
-        Color targetWhite = Color.white;
-        Color targetPink = new Color(0.97f, 0f, 0.9f);
-
-        // Tính khoảng cách Euclidean giữa màu pixel và các màu mục tiêu
-        float distRed = ColorDistance(c, targetRed);
-        float distGreen = ColorDistance(c, targetGreen);
-        float distYellow = ColorDistance(c, targetYellow);
-        float distOrange = ColorDistance(c, targetOrange);
-        float distBlack = ColorDistance(c, targetBlack);
-        float distWhite = ColorDistance(c, targetWhite);
-        float distPink = ColorDistance(c, targetPink);
-
-        // Tìm khoảng cách nhỏ nhất
-        float minDist = Mathf.Min(distRed, distGreen, distYellow, distOrange, distBlack, distWhite, distPink);
-
-        // Giới hạn sai số (nếu ảnh cực sắc nét thì minDist sẽ gần bằng 0)
-        if (minDist > 0.75f) return null; // Không khớp màu nào thì không spawn
-
-        if (minDist == distRed) return "red";
-        if (minDist == distGreen) return "green";
-        if (minDist == distYellow) return "yellow";
-        if (minDist == distOrange) return "orange";
-        if (minDist == distBlack) return "black";
-        if (minDist == distWhite) return "white";
-        return "pink";
-    }
-
-    private GameObject MostColoredPrefab(Dictionary<GameObject, int> dict)
-    {
-        GameObject mostColored = null;
-        int maxCount = 0;
-        foreach (var pair in dict)
+        ShuffleList(allFillerPigs);
+        
+        for (var y = 0; y < maxRows; y++)
         {
-            if (pair.Value > maxCount)
+            for (var x = 0; x < maxCols; x++)
             {
-                maxCount = pair.Value;
-                mostColored = pair.Key;
+                if (queue2Matrix[x, y] != null) continue;
+                if (allFillerPigs.Count <= 0) continue;
+                var filterPig = allFillerPigs[0];
+                allFillerPigs.RemoveAt(0);
+                    
+                queue2Matrix[x, y] = filterPig;
             }
         }
-        return mostColored;
+        ApplyPhysicalPositions(queue2Matrix, maxCols, maxRows);
+    }
+    
+    private static void ApplyPhysicalPositions(GameObject[,] queue2Matrix, int maxCols, int maxRows)
+    {
+        const float spacing = 2.5f;
+        var totalWidth = (maxCols - 1) * spacing;
+        float startX = -totalWidth / 2f;
+
+        for (var y = 0; y < maxRows; y++)
+        {
+            for (var x = 0; x < maxCols; x++)
+            {
+                var pigObj = queue2Matrix[x, y];
+                if (pigObj == null) continue;
+                var posX = startX + (x * spacing);
+                var posY = y * -spacing;
+                pigObj.transform.localPosition = new Vector3(posX, posY, 0);
+            }
+        }
+    }
+    
+    private static void ShuffleList(List<GameObject> list)
+    {
+        for (var i = 0; i < list.Count; i++)
+        {
+            var temp = list[i];
+            var randomIndex = UnityEngine.Random.Range(i, list.Count);
+            list[i] = list[randomIndex];
+            list[randomIndex] = temp;
+        }
     }
 
-    float ColorDistance(Color c1, Color c2)
+    private static string GetClosestColor(Color c)
     {
-        // Tính khoảng cách giữa 2 Vector4 (R, G, B, A)
+        var targetRed = new Color(0.82f, 0.14f, 0.13f);
+        var targetGreen = new Color(0.53f, 0.83f, 0.36f);
+        var targetYellow = new Color(0.98f, 0.87f, 0.24f);
+        var targetOrange = new Color(0.95f, 0.57f, 0.14f);
+        var targetBlack = Color.black;
+        var targetWhite = Color.white;
+        var targetPink = new Color(0.97f, 0f, 0.9f);
+        
+        var distRed = ColorDistance(c, targetRed);
+        var distGreen = ColorDistance(c, targetGreen);
+        var distYellow = ColorDistance(c, targetYellow);
+        var distOrange = ColorDistance(c, targetOrange);
+        var distBlack = ColorDistance(c, targetBlack);
+        var distWhite = ColorDistance(c, targetWhite);
+        var distPink = ColorDistance(c, targetPink);
+
+        var minDist = Mathf.Min(distRed, distGreen, distYellow, distOrange, distBlack, distWhite, distPink);
+        
+        if (minDist > 0.75f) return null;
+
+        if (Mathf.Approximately(minDist, distRed)) return "red";
+        if (Mathf.Approximately(minDist, distGreen)) return "green";
+        if (Mathf.Approximately(minDist, distYellow)) return "yellow";
+        if (Mathf.Approximately(minDist, distOrange)) return "orange";
+        if (Mathf.Approximately(minDist, distBlack)) return "black";
+        return Mathf.Approximately(minDist, distWhite) ? "white" : "pink";
+    }
+
+    private static string MostColoredAtEdge(Dictionary<string, int> dict)
+    {
+        var maxCount = 0;
+        var maxColor = "";
+        foreach (var pair in dict.Where(pair => pair.Value > maxCount))
+        {
+            maxCount = pair.Value;
+            maxColor = pair.Key;
+        }
+        return maxColor;
+    }
+
+    private static float ColorDistance(Color c1, Color c2)
+    {
         return Vector4.Distance(c1, c2);
+    }
+    
+    private void ResetData()
+    {
+        _colorCount.Clear();
+        _edgeColorCount.Clear();
+        _pigs.Clear();
+        DestroyImmediate(_blockGroup);
+        DestroyImmediate(_pigGroup);
     }
 }
