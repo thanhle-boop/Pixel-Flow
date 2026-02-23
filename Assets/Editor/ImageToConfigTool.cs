@@ -10,8 +10,8 @@ public class ImageToConfigTool : EditorWindow
 {
     private Texture2D _inputImage;
     private float _spacing = 1.0f;
-    private int _targetCount = 20;
-
+    private int _targetWidthCount = 20;
+    private int _targetHighCount = 20;
     private GameObject _blockGroup;
     private GameObject _pigGroup;
     
@@ -23,7 +23,8 @@ public class ImageToConfigTool : EditorWindow
     private readonly Dictionary<string, int> _colorCount = new Dictionary<string, int>();
     private readonly Dictionary<string, int> _edgeColorCount = new Dictionary<string, int>();
     private readonly Dictionary<string, GameObject> _blockPrefabs = new Dictionary<string, GameObject>();
-    
+
+
     [MenuItem("Tools/Advanced Color Generator")]
     public static void ShowWindow() => GetWindow<ImageToConfigTool>("Color Tool");
 
@@ -31,16 +32,17 @@ public class ImageToConfigTool : EditorWindow
     {
         _inputImage = (Texture2D)EditorGUILayout.ObjectField("Input Image", _inputImage, typeof(Texture2D), false);
         _spacing = EditorGUILayout.FloatField("Spacing", _spacing);
-        _targetCount = EditorGUILayout.IntField("Target Count", _targetCount);
+        _targetWidthCount = EditorGUILayout.IntField("Target Width Count",_targetWidthCount);
+        _targetHighCount = EditorGUILayout.IntField("Target High Count",_targetHighCount);
         LoadAsset();
-        if (GUILayout.Button($"Generate {_targetCount}x{_targetCount} Grid")) GenerateMapAndPig();
+        if (GUILayout.Button($"Generate {_targetWidthCount}x{_targetHighCount} Grid")) GenerateMapAndPig();
     }
 
     private async void LoadAsset()
     {
         try
         {
-            string[] colors = { "Red", "Green", "Yellow", "Orange", "Black", "White", "Pink" };
+            string[] colors = { "Red", "Green", "Yellow", "Orange", "Black", "White", "Pink","Blue" };
         
             foreach (var c in colors)
             {
@@ -69,49 +71,84 @@ public class ImageToConfigTool : EditorWindow
         GenerateMapBaseOnConfig();
         GeneratePigBaseOnConfig();
     }
-
-    // ReSharper disable Unity.PerformanceAnalysis
+    
     private void GeneratePigBaseOnConfig()
+{
+    _pigGroup = new GameObject("Pig Configuration")
     {
-        _pigGroup = new GameObject("Pig Configuration")
+        transform =
         {
-            transform =
-            {
-                position = new Vector3(0, -10, 0)
-            }
-        };
+            position = new Vector3(0, -10, 0)
+        }
+    };
 
-        foreach (var data in _colorCount)
+    var thresholdVeryHigh = 350;
+    var thresholdHigh = 100;
+    var totalPigsGenerated = 0; 
+
+    foreach (var data in _colorCount)
+    {
+        var pigPrefab = _pigPrefabs[data.Key];
+        var remainingBullet = Mathf.CeilToInt(data.Value / 10f) * 10;
+        
+        if (remainingBullet <= 0) continue;
+
+        int targetBulletPerPig;
+        
+        if (remainingBullet >= thresholdVeryHigh)
         {
-            var pigPrefab = _pigPrefabs[data.Key];
-            var remainingBullet = Mathf.CeilToInt(data.Value/10f) * 10;
-            int[] bulletNumbers = {10,20,30,40,50};
-            var pigComponents = new List<GameObject>();
-            while(remainingBullet > 0)
+            targetBulletPerPig = 50;
+        }
+        else if (remainingBullet >= thresholdHigh)
+        {
+            targetBulletPerPig = 40;
+        }
+        else
+        {
+            targetBulletPerPig = 20;
+        }
+        
+        var pigCountForColor = Mathf.CeilToInt((float)remainingBullet / targetBulletPerPig);
+        
+        var minPigsRequired = Mathf.CeilToInt(remainingBullet / 50f);
+        pigCountForColor = Mathf.Max(pigCountForColor, minPigsRequired);
+        
+        var baseChunk = (remainingBullet / pigCountForColor) / 10 * 10;
+        var remainderBullet = (remainingBullet - (baseChunk * pigCountForColor)) / 10;
+
+        var pigComponents = new List<GameObject>();
+
+        for (var i = 0; i < pigCountForColor; i++)
+        {
+            var bulletCount = baseChunk + (i < remainderBullet ? 10 : 0);
+            
+            var spawnedPig = (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(pigPrefab);
+            
+            if (spawnedPig.TryGetComponent<PigComponent>(out var pigComp))
             {
-                var bullet = bulletNumbers[UnityEngine.Random.Range(0, bulletNumbers.Length)];
-                var spawnedPig = (GameObject)PrefabUtility.InstantiatePrefab(pigPrefab);
-                if(bullet > remainingBullet)
-                {
-                    bullet = remainingBullet;
-                }
-                
-                if (spawnedPig.TryGetComponent<PigComponent>(out var pigComp))
-                {
-                    pigComp.SetBulletCount(bullet);
-                }
-                remainingBullet -= bullet;
-                pigComponents.Add(spawnedPig);
-                
-                var pigTransform = spawnedPig.transform;
-                pigTransform.SetParent(_pigGroup.transform);
-                pigTransform.localPosition = Vector3.zero;
+                pigComp.SetBulletCount(bulletCount);
             }
             
-            _pigs[data.Key] = pigComponents;
+            pigComponents.Add(spawnedPig);
+            
+            var pigTransform = spawnedPig.transform;
+            pigTransform.SetParent(_pigGroup.transform);
+            pigTransform.localPosition = Vector3.zero;
+            
+            totalPigsGenerated++;
         }
-        ArrangePig();
+        
+        _pigs[data.Key] = pigComponents;
     }
+    
+
+    if (totalPigsGenerated is < 10 or > 20)
+    {
+        Debug.LogWarning($"Chú ý: Tổng số heo tạo ra là {totalPigsGenerated}. Nó đang nằm ngoài khoảng 10-20 do số lượng đạn config từ level.");
+    }
+
+    ArrangePig();
+}
 
     private void  GenerateMapBaseOnConfig()
     {
@@ -122,16 +159,16 @@ public class ImageToConfigTool : EditorWindow
                 position = new Vector3(0, 5, 0)
             }
         };
-        var stepX = (float)_inputImage.width / _targetCount;
-        var stepY = (float)_inputImage.height / _targetCount;
+        var stepX = (float)_inputImage.width / _targetWidthCount;
+        var stepY = (float)_inputImage.height / _targetHighCount;
         
-        var gridWidth = (_targetCount - 1) * _spacing;
-        var gridHeight = (_targetCount - 1) * _spacing;
+        var gridWidth = (_targetWidthCount - 1) * _spacing;
+        var gridHeight = (_targetHighCount - 1) * _spacing;
         var offset = new Vector3(-gridWidth / 2f, -gridHeight / 2f, 0);
 
-        for (var i = 0; i < _targetCount; i++)
+        for (var i = 0; i < _targetHighCount; i++)
         {
-            for (var j = 0; j < _targetCount; j++)
+            for (var j = 0; j < _targetWidthCount; j++)
             {
                 var x = Mathf.FloorToInt(j * stepX + (stepX / 2f));
                 var y = Mathf.FloorToInt(i * stepY + (stepY / 2f));
@@ -145,7 +182,7 @@ public class ImageToConfigTool : EditorWindow
                     _colorCount[color]++;
                 }
 
-                if (i == 0 || i == _targetCount - 1 || j == 0 || j == _targetCount - 1)
+                if (i == 0 || i == _targetHighCount - 1 || j == 0 || j == _targetWidthCount - 1)
                 {
                     if (!_edgeColorCount.TryAdd(color, 1))
                     {
@@ -161,64 +198,128 @@ public class ImageToConfigTool : EditorWindow
     }
 
     private void ArrangePig()
+{
+    var primaryColor = MostColoredAtEdge(_edgeColorCount);
+    var pigsPrimary = _pigs[primaryColor];
+    
+    var totalPigs = _pigs.Sum(pigColor => pigColor.Value.Count);
+    
+    var currentLv = 10;
+    var maxLv = 50;
+
+    var maxCols = GetColumnCountBasedOnLevel(currentLv);
+    
+    // SỬA LỖI 1: Bắt buộc để maxRows = totalPigs để mảng đủ dài, 
+    // tránh lỗi tràn mảng khi posY nhảy cóc (step) xuống các hàng dưới.
+    var maxRows = totalPigs; 
+    var queue2Matrix = new GameObject[maxCols, maxRows];
+
+    var maxDistance = Mathf.Min(2, maxRows / 2 + 1);
+    const int stepLimit = 3;
+
+    var dl = (float)currentLv / maxLv;
+    var lastY = -1;
+
+    for (var n = 0; n < pigsPrimary.Count; n++)
     {
-        var primaryColor = MostColoredAtEdge(_edgeColorCount);
-        var pigsPrimary = _pigs[primaryColor];
+        var posX = UnityEngine.Random.Range(0, maxCols);
+        var step = UnityEngine.Random.Range(1 + n / pigsPrimary.Count, stepLimit);
+        var posY = 0;
         
-        var lastY = -1;
-
-        var maxRows = 0;
-        var totalPigs = _pigs.Sum(pigColor => pigColor.Value.Count);
-
-        Debug.Log(totalPigs);
-
-        var calculatedCols = (totalPigs / 10) + 1;
-        
-        var maxCols = Mathf.Clamp(calculatedCols, 3, 5);
-        maxRows = Mathf.CeilToInt((float)totalPigs /maxCols);
-        var queue2Matrix = new GameObject[maxCols, maxRows];
-
-        var maxDistance = Mathf.Min(2, maxRows / 2 + 1);
-        const int stepLimit = 3;
-        var currentLv = 15;
-        var maxLv = 50;
-        var dl = (float)currentLv / maxLv;
-        for (var n = 0; n < pigsPrimary.Count; n++)
+        if (n == 0 || lastY >= maxDistance)
         {
-            var posX = UnityEngine.Random.Range(0, maxCols);
-            var step = UnityEngine.Random.Range(1 + n/pigsPrimary.Count, stepLimit);
-            var posY = 0;
-            if (n == 0)
-            {
-                posY = (int)(dl * UnityEngine.Random.Range(0, 1));
-            }
-            else if (lastY >= maxDistance)
-            {
-                posY = 1;
-            }
-            else
-            {
-                posY = lastY + step;
-            }
+            posY = (int)(dl * UnityEngine.Random.Range(0, maxDistance));
+        }
+        else
+        {
+            posY = lastY + step;
+        }
 
-            if (posY < maxRows && queue2Matrix[posX, posY] == null)
-            {
-                queue2Matrix[posX,posY] = pigsPrimary[n];
- 
-            }
-            else
+        // Đảm bảo posY không bao giờ vượt quá giới hạn mảng
+        if (posY >= maxRows) posY = maxRows - 1;
+
+        if (queue2Matrix[posX, posY] == null)
+        {
+            queue2Matrix[posX, posY] = pigsPrimary[n];
+        }
+        else
+        {
+            // SỬA LỖI 2: Dùng for để tìm chỗ trống an toàn thay vì dùng while(random)
+            bool isPlaced = false;
+
+            // Thử random 10 lần xem có ăn may trúng ô trống không
+            for (int attempt = 0; attempt < 10; attempt++)
             {
                 var reRandomX = UnityEngine.Random.Range(0, maxCols);
-                while (queue2Matrix[reRandomX, posY] != null)
+                if (queue2Matrix[reRandomX, posY] == null)
                 {
-                    reRandomX = UnityEngine.Random.Range(0, maxCols);
+                    queue2Matrix[reRandomX, posY] = pigsPrimary[n];
+                    isPlaced = true;
                     break;
                 }
-                queue2Matrix[reRandomX,posY] = pigsPrimary[n];
             }
-            lastY = posY;
+
+            // Nếu random 10 lần vẫn xui (hoặc hàng đã chật), ta quét tuần tự từ trái qua phải để nhét heo vào ô trống đầu tiên thấy được
+            if (!isPlaced)
+            {
+                for (int x = 0; x < maxCols; x++)
+                {
+                    if (queue2Matrix[x, posY] == null)
+                    {
+                        queue2Matrix[x, posY] = pigsPrimary[n];
+                        isPlaced = true;
+                        break;
+                    }
+                }
+            }
+
+            // Trường hợp cực đoan: Nếu hàng này đã đầy 100%, ta bắt buộc đẩy con heo này xuống hàng tiếp theo (posY + 1)
+            if (!isPlaced)
+            {
+                posY++;
+                if (posY >= maxRows) posY = maxRows - 1; 
+
+                for (int x = 0; x < maxCols; x++)
+                {
+                    if (queue2Matrix[x, posY] == null)
+                    {
+                        queue2Matrix[x, posY] = pigsPrimary[n];
+                        break;
+                    }
+                }
+            }
         }
-        FillRemainingSlots(queue2Matrix, maxRows, maxCols, primaryColor);
+        lastY = posY;
+    }
+    
+    FillRemainingSlots(queue2Matrix, maxRows, maxCols, primaryColor);
+}
+    
+    private int GetColumnCountBasedOnLevel(int currentLevel)
+    {
+        // Lấy một số ngẫu nhiên từ 0 đến 99 để làm tỉ lệ phần trăm
+        int randomChance = UnityEngine.Random.Range(0, 100);
+
+        if (currentLevel <= 15)
+        {
+            // 20% ra cột 2 | 70% ra cột 3 | 10% ra cột 4
+            if (randomChance < 20) return 2;
+            if (randomChance < 90) return 3; // 20 + 70 = 90
+            return 4;
+        }
+        else if (currentLevel <= 30)
+        {
+            // 47% ra cột 3 | 53% ra cột 4
+            if (randomChance < 47) return 3;
+            return 4;
+        }
+        else // Level 31 trở đi
+        {
+            // Có thể lác đác vài cột 3 (vd 10%), 65% cột 4, 25% cột 5
+            if (randomChance < 10) return 3;
+            if (randomChance < 75) return 4;
+            return 5;
+        }
     }
 
     private void FillRemainingSlots(GameObject[,] queue2Matrix, int maxRows, int maxCols,string primaryColor)
@@ -250,7 +351,7 @@ public class ImageToConfigTool : EditorWindow
     {
         const float spacing = 2.5f;
         var totalWidth = (maxCols - 1) * spacing;
-        float startX = -totalWidth / 2f;
+        var startX = -totalWidth / 2f;
 
         for (var y = 0; y < maxRows; y++)
         {
@@ -285,6 +386,7 @@ public class ImageToConfigTool : EditorWindow
         var targetBlack = Color.black;
         var targetWhite = Color.white;
         var targetPink = new Color(0.97f, 0f, 0.9f);
+        var targetBlue = new Color(0.26f, 0.95f, 0.95f);
         
         var distRed = ColorDistance(c, targetRed);
         var distGreen = ColorDistance(c, targetGreen);
@@ -293,8 +395,9 @@ public class ImageToConfigTool : EditorWindow
         var distBlack = ColorDistance(c, targetBlack);
         var distWhite = ColorDistance(c, targetWhite);
         var distPink = ColorDistance(c, targetPink);
+        var distBlue = ColorDistance(c, targetBlue);
 
-        var minDist = Mathf.Min(distRed, distGreen, distYellow, distOrange, distBlack, distWhite, distPink);
+        var minDist = Mathf.Min(distRed, distGreen, distYellow, distOrange, distBlack, distWhite, distPink,distBlue);
         
         if (minDist > 0.75f) return null;
 
@@ -303,6 +406,7 @@ public class ImageToConfigTool : EditorWindow
         if (Mathf.Approximately(minDist, distYellow)) return "yellow";
         if (Mathf.Approximately(minDist, distOrange)) return "orange";
         if (Mathf.Approximately(minDist, distBlack)) return "black";
+        if (Mathf.Approximately(minDist, distBlue)) return "blue";
         return Mathf.Approximately(minDist, distWhite) ? "white" : "pink";
     }
 

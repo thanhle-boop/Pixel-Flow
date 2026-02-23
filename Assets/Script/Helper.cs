@@ -1,0 +1,62 @@
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+public static class Helper 
+{
+    public static string GetClosestColor(Color c)
+    {
+        var targetRed = new Color(0.82f, 0.14f, 0.13f);
+        var targetGreen = new Color(0.53f, 0.83f, 0.36f);
+        var targetYellow = new Color(0.98f, 0.87f, 0.24f);
+        var targetOrange = new Color(0.95f, 0.57f, 0.14f);
+        var targetBlack = Color.black;
+        var targetWhite = Color.white;
+        var targetPink = new Color(0.97f, 0f, 0.9f);
+        var targetBlue = new Color(0.26f, 0.95f, 0.95f);
+        
+        var distRed = Vector4.Distance(c, targetRed);
+        var distGreen = Vector4.Distance(c, targetGreen);
+        var distYellow = Vector4.Distance(c, targetYellow);
+        var distOrange = Vector4.Distance(c, targetOrange);
+        var distBlack = Vector4.Distance(c, targetBlack);
+        var distWhite = Vector4.Distance(c, targetWhite);
+        var distPink = Vector4.Distance(c, targetPink);
+        var distBlue = Vector4.Distance(c, targetBlue);
+
+        var minDist = Mathf.Min(distRed, distGreen, distYellow, distOrange, distBlack, distWhite, distPink, distBlue);
+        
+        if (minDist > 0.75f) return null;
+
+        if (Mathf.Approximately(minDist, distRed)) return "red";
+        if (Mathf.Approximately(minDist, distGreen)) return "green";
+        if (Mathf.Approximately(minDist, distYellow)) return "yellow";
+        if (Mathf.Approximately(minDist, distOrange)) return "orange";
+        if (Mathf.Approximately(minDist, distBlack)) return "black";
+        if (Mathf.Approximately(minDist, distBlue)) return "blue";
+        return Mathf.Approximately(minDist, distWhite) ? "white" : "pink";
+    }
+
+    public static string MostColoredAtEdge(Dictionary<string, int> dict)
+    {
+        var maxCount = 0;
+        var maxColor = "";
+        foreach (var pair in dict.Where(pair => pair.Value > maxCount))
+        {
+            maxCount = pair.Value;
+            maxColor = pair.Key;
+        }
+        return maxColor;
+    }
+
+    public static void ShuffleList(List<GameObject> list)
+    {
+        for (var i = 0; i < list.Count; i++)
+        {
+            var temp = list[i];
+            var randomIndex = UnityEngine.Random.Range(i, list.Count);
+            list[i] = list[randomIndex];
+            list[randomIndex] = temp;
+        }
+    }
+}
