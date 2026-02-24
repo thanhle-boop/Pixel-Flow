@@ -15,8 +15,18 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 9c08fe88ec12c6f49b4e6b3a797627b1
   m_SerializeEntries:
+  - m_GUID: 07d0af08a76c7014a91c6f1d0f35b737
+    m_Address: Pig Red
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 13fcac87950cd0144981b57b86f5aaeb
     m_Address: Purple
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1be8b8b4b7145a046931ae0074b70136
+    m_Address: Pig Orange
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -25,33 +35,33 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 458b22a265015de4984d95263bdaff12
-    m_Address: Pig Red
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 534748d2bc5602a49ac12eb601640016
-    m_Address: Pig Green
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8af88eb17dffdc3449fe166c7dfbf8db
-    m_Address: Pig Black
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8c664d5a3cc0ef4428eebf7cd43072fc
+  - m_GUID: 51f254a4c6a130f46b8ba97e8ab585f5
     m_Address: Pig Pink
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 90971b914c1164c418e64e97f3770767
+  - m_GUID: 52a86b4181095a94bb39eb31547428ef
     m_Address: Pig White
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 926fe1e9a7286584ab03a51bf6a16255
-    m_Address: Pig Orange
+  - m_GUID: 534d81e380e940042b1312a73525503e
+    m_Address: Dark Pink
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5cbada1535931e6488c88423c2c16e6c
+    m_Address: Pig Yellow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 90d1165fe7cec424e99df61fe88f83ca
+    m_Address: Pig Black
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 99bcaec6f09175c43be4fef0d48a7e23
+    m_Address: Pig Green
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -70,6 +80,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0b006cef405f2e42ab0ba26a668104f
+    m_Address: Dark Green
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b3e4f936f7d0e6645875f03eec90892a
     m_Address: White
     m_ReadOnly: 0
@@ -80,13 +95,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cb267f07fc563784aa01cee8a3011e66
+    m_Address: Pig Dark Pink
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cca9ad0f04cf8dd4488fa81d1b91cf13
     m_Address: Pink
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d4330bb448a63c94eab8de2024d268d6
-    m_Address: Pig Blue
+  - m_GUID: d2ad75330b9c9d44985ed1d0e4bacea6
+    m_Address: Pig Dark Green
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -95,8 +115,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e3f37e9d7e567b946b3c6f4e7ef28048
-    m_Address: Pig Yellow
+  - m_GUID: f3922e940adf1d142ba5b6448f11711b
+    m_Address: Pig Blue
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
