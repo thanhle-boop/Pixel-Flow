@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
+public class LevelGenerateConfig : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI titleText;
     [Header("Image DataConfig")] [SerializeField] private ImageConfig[] imageConfigList;
@@ -27,8 +27,8 @@ public class GameManager : MonoBehaviour
     private GameObject _blockGroup;
     
     [Header("UI References")]
-    [SerializeField] private RectTransform pigScrollContent; // 'Content' của Scroll View
-    [SerializeField] private Slider difficultySlider; // 'Content' của Scroll View
+    [SerializeField] private RectTransform pigScrollContent;
+    [SerializeField] private Slider difficultySlider;
 
     private readonly Dictionary<string, List<GameObject>> _pigs = new Dictionary<string, List<GameObject>>();
     private readonly Dictionary<string, GameObject> _pigPrefabs = new Dictionary<string, GameObject>();
@@ -53,15 +53,15 @@ public class GameManager : MonoBehaviour
     private async void Start()
     {
         await LoadAssetAsync();
-        LoadAndSetImageConfig(imageIndex);
         difficultySlider.value = 0.5f;
+        LoadAndSetImageConfig(imageIndex);
     }
 
     private async Task LoadAssetAsync()
     {
         try
         {
-            string[] colors = { "Red", "Green", "Yellow", "Orange", "Black", "White", "Pink", "Blue", "Dark Green", "Dark Pink" };
+            string[] colors = { "Red", "Green", "Yellow", "Orange", "Black", "White", "Pink", "Blue", "Dark Green", "Dark Pink", "Dark Blue" };
             var loadTasks = new List<Task>();
 
             foreach (var c in colors)
@@ -94,47 +94,83 @@ public class GameManager : MonoBehaviour
         GeneratePigBaseOnConfig();
     }
     
-    private void GeneratePigBaseOnConfig()
+private void GeneratePigBaseOnConfig()
+{
+    maxCols = GetColumnCountBasedOnDifficulty(_currentDifficulty);
+    ResetData();
+    GenerateMapBaseOnConfig();
+
+    var primaryColor = Helper.MostColoredAtEdge(_edgeColorCount);
+    
+    var filterColors = _colorCount.Where(x => x.Key != primaryColor).ToList();
+    var totalFilterPigs = 0;
+    var filterPigCounts = new Dictionary<string, int>();
+
+    foreach (var data in filterColors)
     {
-        maxCols = GetColumnCountBasedOnDifficulty(_currentDifficulty);
+        var bullets = Mathf.CeilToInt(data.Value / 10f) * 10;
+        if (bullets <= 0) continue;
         
-        var thresholdVeryHigh = 350;
-        var thresholdHigh = 100;
-
-        foreach (var data in _colorCount)
-        {
-            if (!_pigPrefabs.TryGetValue(data.Key, out var pigPrefab)) continue;
-
-            var remainingBullet = Mathf.CeilToInt(data.Value / 10f) * 10;
-            if (remainingBullet <= 0) continue;
-
-            int targetBulletPerPig = (remainingBullet >= thresholdVeryHigh) ? 50 : (remainingBullet >= thresholdHigh ? 40 : 20);
-            var pigCountForColor = Mathf.Max(Mathf.CeilToInt((float)remainingBullet / targetBulletPerPig), Mathf.CeilToInt(remainingBullet / 50f));
-            
-            var baseChunk = (remainingBullet / pigCountForColor) / 10 * 10;
-            var remainderBullet = (remainingBullet - (baseChunk * pigCountForColor)) / 10;
-
-            var pigComponents = new List<GameObject>();
-
-            for (var i = 0; i < pigCountForColor; i++)
-            {
-                var bulletCount = baseChunk + (i < remainderBullet ? 10 : 0);
-                
-                // Sinh vào UI Content
-                var spawnedPig = Instantiate(pigPrefab, pigScrollContent);
-                
-                if (spawnedPig.TryGetComponent<PigComponent>(out var pigComp))
-                {
-                    pigComp.SetBulletCount(bulletCount);
-                }
-                
-                pigComponents.Add(spawnedPig);
-            }
-            _pigs[data.Key] = pigComponents;
-        }
+        var targetBullet = (bullets >= 350) ? 50 : (bullets > 100 ? 40 : 20);
+        var pigCount = Mathf.Max(Mathf.CeilToInt((float)bullets / targetBullet), Mathf.CeilToInt(bullets / 50f));
         
-        ArrangePig();
+        filterPigCounts[data.Key] = pigCount;
+        totalFilterPigs += pigCount;
     }
+    
+    var primaryBullets = 0;
+    var primaryPigCount = 0;
+    if (_colorCount.TryGetValue(primaryColor, out var value))
+    {
+        primaryBullets = Mathf.CeilToInt(value / 10f) * 10;
+        var primaryTarget = (primaryBullets >= 350) ? 50 : (primaryBullets >= 100 ? 40 : 20);
+        primaryPigCount = Mathf.Max(Mathf.CeilToInt((float)primaryBullets / primaryTarget), Mathf.CeilToInt(primaryBullets / 50f));
+    }
+    
+    var currentTotalPigs = totalFilterPigs + primaryPigCount;
+    var remainder = currentTotalPigs % maxCols;
+    if (remainder != 0)
+    {
+        var neededSlots = maxCols - remainder;
+        primaryPigCount += neededSlots; 
+    }
+
+    CreatePigsForColor(primaryColor, primaryBullets, primaryPigCount);
+    
+    foreach (var kvp in filterPigCounts)
+    {
+        var bullets = Mathf.CeilToInt(_colorCount[kvp.Key] / 10f) * 10;
+        CreatePigsForColor(kvp.Key, bullets, kvp.Value);
+    }
+
+    ArrangePig();
+}
+
+private void CreatePigsForColor(string colorKey, int totalBullets, int pigCount)
+{
+    if (!_pigPrefabs.TryGetValue(colorKey, out var prefab) || pigCount <= 0) return;
+
+    var pigList = new List<GameObject>();
+    
+    var baseChunk = (totalBullets / pigCount) / 10 * 10;
+    if (baseChunk < 10 && totalBullets >= 10) baseChunk = 10; 
+    
+    var remainderTenUnits = (totalBullets - (baseChunk * pigCount)) / 10;
+
+    for (var i = 0; i < pigCount; i++)
+    {
+        var bulletCount = baseChunk + (i < remainderTenUnits ? 10 : 0);
+        if (bulletCount <= 0 && totalBullets > 0) bulletCount = 10; 
+
+        var spawnedPig = Instantiate(prefab, pigScrollContent);
+        if (spawnedPig.TryGetComponent<PigComponent>(out var pigComp))
+        {
+            pigComp.SetBulletCount(bulletCount);
+        }
+        pigList.Add(spawnedPig);
+    }
+    _pigs[colorKey] = pigList;
+}
 
     private void GenerateMapBaseOnConfig()
     {
@@ -172,9 +208,8 @@ public class GameManager : MonoBehaviour
     private void ArrangePig()
     {
         var primaryColor = Helper.MostColoredAtEdge(_edgeColorCount);
-        if (!_pigs.ContainsKey(primaryColor)) return;
+        if (!_pigs.TryGetValue(primaryColor, out var pigsPrimary)) return;
 
-        var pigsPrimary = _pigs[primaryColor];
         var totalPigs = _pigs.Sum(pigColor => pigColor.Value.Count);
 
         var maxRows = Mathf.CeilToInt((float)totalPigs/maxCols);
@@ -202,15 +237,15 @@ public class GameManager : MonoBehaviour
                 queue2Matrix[posX, posY] = pigsPrimary[n];
             else
             {
-                bool isPlaced = false;
-                for (int attempt = 0; attempt < 10; attempt++)
+                var isPlaced = false;
+                for (var attempt = 0; attempt < 10; attempt++)
                 {
                     var reX = UnityEngine.Random.Range(0, maxCols);
                     if (queue2Matrix[reX, posY] == null) { queue2Matrix[reX, posY] = pigsPrimary[n]; isPlaced = true; break; }
                 }
                 if (!isPlaced)
                 {
-                    for (int x = 0; x < maxCols; x++)
+                    for (var x = 0; x < maxCols; x++)
                     {
                         if (queue2Matrix[x, posY] == null) { queue2Matrix[x, posY] = pigsPrimary[n]; isPlaced = true; break; }
                     }
@@ -219,7 +254,7 @@ public class GameManager : MonoBehaviour
                 {
                     posY++;
                     if (posY >= maxRows) posY = maxRows - 1; 
-                    for (int x = 0; x < maxCols; x++)
+                    for (var x = 0; x < maxCols; x++)
                     {
                         if (queue2Matrix[x, posY] == null) { queue2Matrix[x, posY] = pigsPrimary[n]; break; }
                     }
@@ -253,8 +288,8 @@ public class GameManager : MonoBehaviour
     
 private void ApplyPhysicalPositions(GameObject[,] queue2Matrix, int currentMaxCols, int maxRows)
 {
-    float spacingX = 150f; 
-    float spacingY = 150f; 
+    var spacingX = 150f; 
+    var spacingY = 150f; 
     
     float totalWidth = (currentMaxCols - 1) * spacingX;
     float startX = -totalWidth / 2f;

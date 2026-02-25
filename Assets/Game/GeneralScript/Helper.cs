@@ -11,11 +11,12 @@ public static class Helper
         var targetDarkGreen = new Color(0.12f, 0.67f, 0.09f);
         var targetYellow = new Color(0.98f, 0.87f, 0.24f);
         var targetOrange = new Color(0.95f, 0.57f, 0.14f);
-        var targetBlack = new Color(0.25f, 0.27f, 0.29f);
+        var targetBlack = new Color(0.309f, 0.322f, 0.357f);
         var targetWhite = new Color(0.96f, 0.99f, 0.97f);
         var targetPink = new Color(1f, 0.77f, 1f);
         var targetDarkPink = new Color(0.945f, 0.34f, 0.71f);
         var targetBlue = new Color(0.26f, 0.95f, 0.95f);
+        var targetDarkBlue = new Color(0.027f, 0.635f, 0.98f);
         
         var distRed = Vector4.Distance(c, targetRed);
         var distGreen = Vector4.Distance(c, targetGreen);
@@ -27,8 +28,9 @@ public static class Helper
         var distDarkPink = Vector4.Distance(c, targetDarkPink);
         var distDarkGreen = Vector4.Distance(c, targetDarkGreen);
         var distBlue = Vector4.Distance(c, targetBlue);
+        var distDarkBlue = Vector4.Distance(c, targetDarkBlue);
 
-        var minDist = Mathf.Min(distRed, distGreen, distYellow, distOrange, distBlack, distWhite, distPink, distBlue, distDarkPink, distDarkGreen);
+        var minDist = Mathf.Min(distRed, distGreen, distYellow, distOrange, distBlack, distWhite, distPink, distBlue, distDarkPink, distDarkGreen,distDarkBlue);
         
         if (minDist > 0.75f) return null;
 
@@ -40,6 +42,7 @@ public static class Helper
         if (Mathf.Approximately(minDist, distBlue)) return "blue";
         if (Mathf.Approximately(minDist , distDarkGreen)) return "dark green";
         if (Mathf.Approximately(minDist, distDarkPink)) return "dark pink";
+        if (Mathf.Approximately(minDist, distDarkBlue)) return "dark blue";
         return Mathf.Approximately(minDist, distWhite) ? "white" : "pink";
     }
 

@@ -1097,7 +1097,7 @@ GameObject:
   - component: {fileID: 648540684}
   - component: {fileID: 648540683}
   m_Layer: 0
-  m_Name: Game Manager
+  m_Name: Generate Config
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
