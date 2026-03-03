@@ -15,5 +15,20 @@ MonoBehaviour:
   levelIndex: 16
   textureInput: {fileID: 2800000, guid: 91934636cb95dbb43950f0f6d12cc959, type: 3}
   width: 20
-  height: 20
-  spacing: 0.5
+  height: 19
+  spacing: 0.55
+  colorCounts:
+  - colorName: red
+    count: 110
+  - colorName: pink
+    count: 80
+  - colorName: white
+    count: 70
+  - colorName: black
+    count: 70
+  - colorName: yellow
+    count: 30
+  - colorName: dark blue
+    count: 10
+  - colorName: dark pink
+    count: 10

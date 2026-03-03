@@ -10,10 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2475a38c4d3e3834db726832bc5a744a, type: 3}
-  m_Name: Image Lv 50
+  m_Name: Image Lv 1
   m_EditorClassIdentifier: Assembly-CSharp::ImageConfig
-  levelIndex: 50
-  textureInput: {fileID: 2800000, guid: e5cbe7a9762336b49b6a2b73fa840dbb, type: 3}
-  width: 25
-  height: 28
-  spacing: 0.35
+  levelIndex: 2
+  textureInput: {fileID: 2800000, guid: 858dc23c072bfbe48a13e028bf45ff12, type: 3}
+  width: 20
+  height: 20
+  spacing: 0.5
+  colorCounts:
+  - colorName: dark pink
+    count: 230
+  - colorName: yellow
+    count: 170
