@@ -103,3 +103,8 @@ InitTestScene*.unity*
 
 /Assets/Feel
 /Assets/UnitySimpleFileBrowser-master
+/Packages/
+/LunaTemp/
+luna.json
+/Assets/SVC_Luna.asset
+/Assets/SVC_Luna.asset.meta
