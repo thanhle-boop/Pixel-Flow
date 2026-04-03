@@ -48,7 +48,7 @@ public class ImageToConfigToolEditor : EditorWindow
     
     private readonly string[] ALL_COLORS = { 
         "red", "green", "blue", "yellow", "black","brown","light brown","cream","gray", "purple","light blue","purple",
-        "white", "pink", "dark pink", "orange", "dark green", "dark blue", "empty" 
+        "white", "pink", "dark pink", "orange", "dark green", "dark blue", "empty","light green" 
     };
     
     [MenuItem("Tools/Level Generator Tool")]
@@ -121,6 +121,8 @@ public class ImageToConfigToolEditor : EditorWindow
                 Rect innerRect = new Rect(r.x + padding, r.y + padding, r.width - padding * 2, r.height - padding * 2);
 
                 Color displayColor = GetColorFromName(colorName);
+                // Debug.Log(colorName);
+                // Debug.Log(displayColor);
                 EditorGUI.DrawRect(innerRect, displayColor);
 
                 // Logic Paint
@@ -340,7 +342,8 @@ public class ImageToConfigToolEditor : EditorWindow
                 if (col.a < 0.1f) _finalGridMap[x, y] = "empty";
                 else {
                     string cName = Helper.GetClosestColor(col).ToLower();
-                    _finalGridMap[x, y] = _blockPrefabs.ContainsKey(cName) ? cName : "white";
+                    // Debug.Log(cName);
+                    _finalGridMap[x, y] = cName;
                 }
             }
         }
@@ -410,12 +413,20 @@ public class ImageToConfigToolEditor : EditorWindow
         List<PigDataPool> pool = new List<PigDataPool>();
         foreach (var item in _finalColorCounts) {
             int total = item.Value;
-            int perPig = (total >= 100) ? 40 : 20;
-            int count = Mathf.Max(1, total / perPig);
-            int sum = 0;
+            if (total <= 0) continue; 
+
+            int perPig = total < 100 ? 10 : 40;
+
+            int count = (total + perPig - 1) / perPig; 
+    
+            int remaining = total;
             for (int i = 0; i < count; i++) {
-                int bullets = (i == count - 1) ? total - sum : perPig;
-                if (bullets > 0) { pool.Add(new PigDataPool { color = item.Key, bullets = bullets }); sum += bullets; }
+                int bullets = Mathf.Min(perPig, remaining);
+        
+                if (bullets > 0) {
+                    pool.Add(new PigDataPool { color = item.Key, bullets = bullets });
+                    remaining -= bullets;
+                }
             }
         }
         _pigsBeforeAdjust = pool.Count;
@@ -448,39 +459,85 @@ public class ImageToConfigToolEditor : EditorWindow
     }
 
     private int RunFullSimulationEnhanced(List<string> playDeck, List<int> pigBullets, string[,] grid)
-    {
-        int steps = 0;
-        List<string> q1C = new List<string>();
-        List<int> q1B = new List<int>();
-        List<string>[] colsC = new List<string>[_queueColumns];
-        List<int>[] colsB = new List<int>[_queueColumns];
-        for (int i = 0; i < _queueColumns; i++) { colsC[i] = new List<string>(); colsB[i] = new List<int>(); }
-        for (int i = 0; i < playDeck.Count; i++) { colsC[i % _queueColumns].Add(playDeck[i]); colsB[i % _queueColumns].Add(pigBullets[i]); }
+{
+    int steps = 0;
+    List<string> q1C = new List<string>();
+    List<int> q1B = new List<int>();
+    
+    // Khởi tạo các cột
+    List<string>[] colsC = new List<string>[_queueColumns];
+    List<int>[] colsB = new List<int>[_queueColumns];
+    for (int i = 0; i < _queueColumns; i++) {
+        colsC[i] = new List<string>();
+        colsB[i] = new List<int>();
+    }
+    
+    // Chia heo vào các lane
+    for (int i = 0; i < playDeck.Count; i++) {
+        colsC[i % _queueColumns].Add(playDeck[i]);
+        colsB[i % _queueColumns].Add(pigBullets[i]);
+    }
 
-        int failsafe = 0;
-        while ((colsC.Any(c => c.Count > 0) || q1C.Count > 0) && failsafe++ < 1000) {
-            bool moved = false;
-            for (int i = 0; i < q1C.Count; i++) {
-                if (IsExposed(q1C[i], grid)) { steps++; ClearGridSim(q1C[i], q1B[i], grid); q1C.RemoveAt(i); q1B.RemoveAt(i); moved = true; break; }
+    int failsafe = 0;
+    while ((colsC.Any(c => c.Count > 0) || q1C.Count > 0) && failsafe++ < 1000) {
+        bool moved = false;
+
+        // ƯU TIÊN 1: Kiểm tra các con heo ĐANG Ở TRONG QUEUE
+        // Nếu người chơi thấy heo trong queue khớp, họ sẽ click nó.
+        for (int i = 0; i < q1C.Count; i++) {
+            if (IsExposed(q1C[i], grid)) { 
+                steps++; // Người chơi click vào heo trong queue
+                ClearGridSim(q1C[i], q1B[i], grid);
+                q1C.RemoveAt(i);
+                q1B.RemoveAt(i);
+                moved = true;
+                break; 
             }
-            if (moved) continue;
-            int bestCol = -1;
-            for (int i = 0; i < _queueColumns; i++) if (colsC[i].Count > 0 && IsExposed(colsC[i][0], grid)) { bestCol = i; break; }
-            if (bestCol != -1) {
-                steps++; ClearGridSim(colsC[bestCol][0], colsB[bestCol][0], grid);
-                colsC[bestCol].RemoveAt(0); colsB[bestCol].RemoveAt(0); moved = true;
-            } else {
-                int colToForce = -1;
-                for (int i = 0; i < _queueColumns; i++) if (colsC[i].Count > 0) { colToForce = i; break; }
-                if (colToForce != -1) {
-                    if (q1C.Count < MaxQueue1) { steps++; q1C.Add(colsC[colToForce][0]); q1B.Add(colsB[colToForce][0]); colsC[colToForce].RemoveAt(0); colsB[colToForce].RemoveAt(0); moved = true; }
-                    else return -1;
+        }
+        if (moved) continue;
+
+        // ƯU TIÊN 2: Kiểm tra heo ở ĐẦU CỘT
+        int bestCol = -1;
+        for (int i = 0; i < _queueColumns; i++) {
+            if (colsC[i].Count > 0 && IsExposed(colsC[i][0], grid)) {
+                bestCol = i;
+                break;
+            }
+        }
+
+        if (bestCol != -1) {
+            steps++; // Người chơi click vào heo ở đầu cột
+            ClearGridSim(colsC[bestCol][0], colsB[bestCol][0], grid);
+            colsC[bestCol].RemoveAt(0);
+            colsB[bestCol].RemoveAt(0);
+            moved = true;
+        } else {
+            // ƯU TIÊN 3: Không có con nào khớp trực tiếp -> Phải đẩy 1 con vào Queue
+            int colToForce = -1;
+            for (int i = 0; i < _queueColumns; i++) {
+                if (colsC[i].Count > 0) {
+                    colToForce = i;
+                    break;
                 }
             }
-            if (!moved) break;
+
+            if (colToForce != -1) {
+                if (q1C.Count < MaxQueue1) {
+                    steps++; // Người chơi click đẩy heo vào queue
+                    q1C.Add(colsC[colToForce][0]);
+                    q1B.Add(colsB[colToForce][0]);
+                    colsC[colToForce].RemoveAt(0);
+                    colsB[colToForce].RemoveAt(0);
+                    moved = true;
+                } else {
+                    return -1; // Deadlock (Queue đầy mà không con nào khớp)
+                }
+            }
         }
-        return steps;
+        if (!moved) break;
     }
+    return steps;
+}
     
     private Color GetColorFromName(string name)
     {
@@ -572,7 +629,7 @@ public class ImageToConfigToolEditor : EditorWindow
         data.targetDifficulty = _targetStepsInput;
         
         data.gridData = new List<string>();
-        for (int y = 0; y < _finalHeight; y++)
+        for (int y = _finalHeight - 1; y >= 0; y--)
         {
             for (int x = 0; x < _finalWidth; x++)
             {
