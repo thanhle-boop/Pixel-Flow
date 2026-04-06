@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6480c3a11ef13143b71f9c64c7da64c, type: 3}
   m_Name: DrumSequence
   m_EditorClassIdentifier: 
-  Length: 3.2
+  Length: 6
   OriginalSequence:
     Line: []
-  EndSilenceDuration: 0.3
+  EndSilenceDuration: 0.375
   SequenceTracks:
   - ID: 0
     TrackColor: {r: 1, g: 0, b: 0, a: 1}
@@ -84,369 +84,369 @@ MonoBehaviour:
     State: 0
     Initialized: 1
   Quantized: 1
-  TargetBPM: 300
+  TargetBPM: 160
   QuantizedSequence:
   - Line:
     - Timestamp: 0
       ID: 0
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: 0
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: 0
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: -1
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: 0
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: 0
-    - Timestamp: 1.4
+    - Timestamp: 2.625
       ID: -1
-    - Timestamp: 1.6
-      ID: 0
-    - Timestamp: 1.8000001
-      ID: 0
-    - Timestamp: 2
-      ID: 0
-    - Timestamp: 2.2
-      ID: -1
-    - Timestamp: 2.4
-      ID: 0
-    - Timestamp: 2.6000001
-      ID: -1
-    - Timestamp: 2.8
-      ID: 0
     - Timestamp: 3
+      ID: 0
+    - Timestamp: 3.375
+      ID: 0
+    - Timestamp: 3.75
+      ID: 0
+    - Timestamp: 4.125
+      ID: -1
+    - Timestamp: 4.5
+      ID: 0
+    - Timestamp: 4.875
+      ID: -1
+    - Timestamp: 5.25
+      ID: 0
+    - Timestamp: 5.625
       ID: -1
   - Line:
     - Timestamp: 0
       ID: 1
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: 1
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: -1
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: -1
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: 1
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: -1
-    - Timestamp: 1.4
-      ID: -1
-    - Timestamp: 1.6
-      ID: 1
-    - Timestamp: 1.8000001
-      ID: 1
-    - Timestamp: 2
-      ID: -1
-    - Timestamp: 2.2
-      ID: -1
-    - Timestamp: 2.4
-      ID: 1
-    - Timestamp: 2.6000001
-      ID: -1
-    - Timestamp: 2.8
+    - Timestamp: 2.625
       ID: -1
     - Timestamp: 3
+      ID: 1
+    - Timestamp: 3.375
+      ID: 1
+    - Timestamp: 3.75
+      ID: -1
+    - Timestamp: 4.125
+      ID: -1
+    - Timestamp: 4.5
+      ID: 1
+    - Timestamp: 4.875
+      ID: -1
+    - Timestamp: 5.25
+      ID: -1
+    - Timestamp: 5.625
       ID: -1
   - Line:
     - Timestamp: 0
       ID: 2
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: -1
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: 2
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: -1
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: -1
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: -1
-    - Timestamp: 1.4
-      ID: -1
-    - Timestamp: 1.6
-      ID: 2
-    - Timestamp: 1.8000001
-      ID: -1
-    - Timestamp: 2
-      ID: 2
-    - Timestamp: 2.2
-      ID: -1
-    - Timestamp: 2.4
-      ID: -1
-    - Timestamp: 2.6000001
-      ID: -1
-    - Timestamp: 2.8
+    - Timestamp: 2.625
       ID: -1
     - Timestamp: 3
+      ID: 2
+    - Timestamp: 3.375
+      ID: -1
+    - Timestamp: 3.75
+      ID: 2
+    - Timestamp: 4.125
+      ID: -1
+    - Timestamp: 4.5
+      ID: -1
+    - Timestamp: 4.875
+      ID: -1
+    - Timestamp: 5.25
+      ID: -1
+    - Timestamp: 5.625
       ID: -1
   - Line:
     - Timestamp: 0
       ID: 3
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: -1
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: -1
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: -1
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: 3
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: -1
-    - Timestamp: 1.4
-      ID: -1
-    - Timestamp: 1.6
-      ID: 3
-    - Timestamp: 1.8000001
-      ID: -1
-    - Timestamp: 2
-      ID: -1
-    - Timestamp: 2.2
-      ID: -1
-    - Timestamp: 2.4
-      ID: 3
-    - Timestamp: 2.6000001
-      ID: -1
-    - Timestamp: 2.8
+    - Timestamp: 2.625
       ID: -1
     - Timestamp: 3
+      ID: 3
+    - Timestamp: 3.375
+      ID: -1
+    - Timestamp: 3.75
+      ID: -1
+    - Timestamp: 4.125
+      ID: -1
+    - Timestamp: 4.5
+      ID: 3
+    - Timestamp: 4.875
+      ID: -1
+    - Timestamp: 5.25
+      ID: -1
+    - Timestamp: 5.625
       ID: -1
   - Line:
     - Timestamp: 0
       ID: -1
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: -1
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: -1
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: -1
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: -1
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: 4
-    - Timestamp: 1.4
+    - Timestamp: 2.625
       ID: -1
-    - Timestamp: 1.6
+    - Timestamp: 3
       ID: -1
-    - Timestamp: 1.8000001
+    - Timestamp: 3.375
       ID: -1
-    - Timestamp: 2
+    - Timestamp: 3.75
       ID: -1
-    - Timestamp: 2.2
+    - Timestamp: 4.125
       ID: -1
-    - Timestamp: 2.4
+    - Timestamp: 4.5
       ID: -1
-    - Timestamp: 2.6000001
+    - Timestamp: 4.875
       ID: -1
-    - Timestamp: 2.8
+    - Timestamp: 5.25
       ID: 4
-    - Timestamp: 3
+    - Timestamp: 5.625
       ID: -1
   - Line:
     - Timestamp: 0
       ID: -1
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: -1
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: 5
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: 5
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: -1
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: 5
-    - Timestamp: 1.4
-      ID: 5
-    - Timestamp: 1.6
-      ID: -1
-    - Timestamp: 1.8000001
-      ID: -1
-    - Timestamp: 2
-      ID: 5
-    - Timestamp: 2.2
-      ID: 5
-    - Timestamp: 2.4
-      ID: -1
-    - Timestamp: 2.6000001
-      ID: -1
-    - Timestamp: 2.8
+    - Timestamp: 2.625
       ID: 5
     - Timestamp: 3
+      ID: -1
+    - Timestamp: 3.375
+      ID: -1
+    - Timestamp: 3.75
+      ID: 5
+    - Timestamp: 4.125
+      ID: 5
+    - Timestamp: 4.5
+      ID: -1
+    - Timestamp: 4.875
+      ID: -1
+    - Timestamp: 5.25
+      ID: 5
+    - Timestamp: 5.625
       ID: 5
   - Line:
     - Timestamp: 0
       ID: -1
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: -1
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: 6
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: -1
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: -1
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: 6
-    - Timestamp: 1.4
+    - Timestamp: 2.625
       ID: -1
-    - Timestamp: 1.6
-      ID: -1
-    - Timestamp: 1.8000001
-      ID: -1
-    - Timestamp: 2
-      ID: 6
-    - Timestamp: 2.2
-      ID: -1
-    - Timestamp: 2.4
-      ID: -1
-    - Timestamp: 2.6000001
-      ID: -1
-    - Timestamp: 2.8
-      ID: 6
     - Timestamp: 3
+      ID: -1
+    - Timestamp: 3.375
+      ID: -1
+    - Timestamp: 3.75
+      ID: 6
+    - Timestamp: 4.125
+      ID: -1
+    - Timestamp: 4.5
+      ID: -1
+    - Timestamp: 4.875
+      ID: -1
+    - Timestamp: 5.25
+      ID: 6
+    - Timestamp: 5.625
       ID: -1
   - Line:
     - Timestamp: 0
       ID: 7
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: 7
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: -1
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: 7
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: -1
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: 7
-    - Timestamp: 1.4
-      ID: 7
-    - Timestamp: 1.6
-      ID: 7
-    - Timestamp: 1.8000001
-      ID: 7
-    - Timestamp: 2
-      ID: -1
-    - Timestamp: 2.2
-      ID: 7
-    - Timestamp: 2.4
-      ID: -1
-    - Timestamp: 2.6000001
-      ID: -1
-    - Timestamp: 2.8
+    - Timestamp: 2.625
       ID: 7
     - Timestamp: 3
+      ID: 7
+    - Timestamp: 3.375
+      ID: 7
+    - Timestamp: 3.75
+      ID: -1
+    - Timestamp: 4.125
+      ID: 7
+    - Timestamp: 4.5
+      ID: -1
+    - Timestamp: 4.875
+      ID: -1
+    - Timestamp: 5.25
+      ID: 7
+    - Timestamp: 5.625
       ID: 7
   - Line:
     - Timestamp: 0
       ID: 8
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: 8
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: -1
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: -1
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: -1
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: -1
-    - Timestamp: 1.4
-      ID: -1
-    - Timestamp: 1.6
-      ID: 8
-    - Timestamp: 1.8000001
-      ID: 8
-    - Timestamp: 2
-      ID: -1
-    - Timestamp: 2.2
-      ID: -1
-    - Timestamp: 2.4
-      ID: 8
-    - Timestamp: 2.6000001
-      ID: -1
-    - Timestamp: 2.8
+    - Timestamp: 2.625
       ID: -1
     - Timestamp: 3
+      ID: 8
+    - Timestamp: 3.375
+      ID: 8
+    - Timestamp: 3.75
+      ID: -1
+    - Timestamp: 4.125
+      ID: -1
+    - Timestamp: 4.5
+      ID: 8
+    - Timestamp: 4.875
+      ID: -1
+    - Timestamp: 5.25
+      ID: -1
+    - Timestamp: 5.625
       ID: -1
   - Line:
     - Timestamp: 0
       ID: 9
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: -1
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: -1
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: -1
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: -1
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: -1
-    - Timestamp: 1.4
-      ID: -1
-    - Timestamp: 1.6
-      ID: 9
-    - Timestamp: 1.8000001
-      ID: -1
-    - Timestamp: 2
-      ID: -1
-    - Timestamp: 2.2
-      ID: -1
-    - Timestamp: 2.4
-      ID: -1
-    - Timestamp: 2.6000001
-      ID: -1
-    - Timestamp: 2.8
+    - Timestamp: 2.625
       ID: -1
     - Timestamp: 3
+      ID: 9
+    - Timestamp: 3.375
+      ID: -1
+    - Timestamp: 3.75
+      ID: -1
+    - Timestamp: 4.125
+      ID: -1
+    - Timestamp: 4.5
+      ID: -1
+    - Timestamp: 4.875
+      ID: -1
+    - Timestamp: 5.25
+      ID: -1
+    - Timestamp: 5.625
       ID: -1
   - Line:
     - Timestamp: 0
       ID: -1
-    - Timestamp: 0.2
+    - Timestamp: 0.375
       ID: 10
-    - Timestamp: 0.4
+    - Timestamp: 0.75
       ID: 10
-    - Timestamp: 0.6
+    - Timestamp: 1.125
       ID: -1
-    - Timestamp: 0.8
+    - Timestamp: 1.5
       ID: -1
-    - Timestamp: 1
+    - Timestamp: 1.875
       ID: -1
-    - Timestamp: 1.2
+    - Timestamp: 2.25
       ID: -1
-    - Timestamp: 1.4
-      ID: -1
-    - Timestamp: 1.6
-      ID: -1
-    - Timestamp: 1.8000001
-      ID: 10
-    - Timestamp: 2
-      ID: 10
-    - Timestamp: 2.2
-      ID: -1
-    - Timestamp: 2.4
-      ID: -1
-    - Timestamp: 2.6000001
-      ID: -1
-    - Timestamp: 2.8
+    - Timestamp: 2.625
       ID: -1
     - Timestamp: 3
+      ID: -1
+    - Timestamp: 3.375
+      ID: 10
+    - Timestamp: 3.75
+      ID: 10
+    - Timestamp: 4.125
+      ID: -1
+    - Timestamp: 4.5
+      ID: -1
+    - Timestamp: 4.875
+      ID: -1
+    - Timestamp: 5.25
+      ID: -1
+    - Timestamp: 5.625
       ID: -1
   RandomizeTrackColorsButton: 0
